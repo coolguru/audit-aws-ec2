@@ -228,7 +228,8 @@ end
 coreo_aws_advisor_alert "ec2-snapshot-check" do
   action :define
   service :ec2
-  link ""
+  link "http://kb.cloudcoreo.com"
+  id_map "object.snapshot_set.snapshot_id"
   display_name "Snapshot bigger than 256GB and not encrypted."
   description "Snapshot bigger than 256GB and not encrypted."
   category "Optimization"
