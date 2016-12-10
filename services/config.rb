@@ -238,7 +238,7 @@ coreo_aws_advisor_alert "ec2-snapshot-check" do
   objectives ["snapshots","snapshots"]
   audit_objects ["object.snapshot_set.volume_size","object.snapshot_set.encrypted"]
   operators [">","=="]
-  alert_when [1,false]
+  alert_when [256,false]
 end
 
 coreo_aws_advisor_ec2 "advise-ec2" do
