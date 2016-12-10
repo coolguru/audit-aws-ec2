@@ -225,6 +225,21 @@ coreo_aws_advisor_alert "ec2-ports-range" do
   alert_when ["object[:to_port]"]
 end
 
+coreo_aws_advisor_alert "ec2-snapshot-check" do
+  action :define
+  service :ec2
+  link ""
+  display_name "Snapshot bigger than 256GB and not encrypted."
+  description "Snapshot bigger than 256GB and not encrypted."
+  category "Optimization"
+  suggested_action "Review your EC2 snapshots to make sure that they are not in error and are encrypted."
+  level "Warning"
+  objectives ["snapshots","snapshots"]
+  audit_objects ["object.snapshot_set.volume_size","object.snapshot_set.encrypted"]
+  operators [">","=="]
+  alert_when [256,false]
+end
+
 coreo_aws_advisor_ec2 "advise-ec2" do
   action :advise
   alerts ${AUDIT_AWS_EC2_ALERT_LIST}
