@@ -18,6 +18,7 @@ variables:
       - ec2-TCP-21
       - ec2-TCP-20
       - ec2-ports-range
+      - ec2-snapshot-check
   AUDIT_AWS_EC2_ALERT_RECIPIENT:
     description: "Enter the email address(es) that will receive notifications. If more than one, separate each with a comma."
     required: false
