@@ -263,12 +263,12 @@ coreo_aws_advisor_alert "ec2-default-security-group-permissions" do
   category "Inventory"
   suggested_action "None."
   level "Critical"
-  objectives ["security_groups", "security_groups"]
+  objectives ["security_groups"]
   id_map "object.security_group_info.owner_id"
-  audit_objects ["", "security_group_info.ip_permissions"]
+  audit_objects ["object.security_group_info.ip_permissions"]
   # call_modifiers [{}, {:group_names => ["default","default"]}]
-  operators ["", "=="]
-  alert_when ["", /.*/]
+  operators ["=="]
+  alert_when [/.*/]
 end
 
 
