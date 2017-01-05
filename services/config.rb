@@ -255,7 +255,7 @@ coreo_aws_advisor_alert "ec2-instances-active-security-groups-list" do
   alert_when [//]
 end
 
-coreo_aws_advisor_alert "ec2-ian-security-groups-default-no-rule-ip" do
+coreo_aws_advisor_alert "ec2-default-security-group-permissions" do
   action :define
   service :ec2
   display_name "SG default IP"

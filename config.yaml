@@ -21,6 +21,8 @@ variables:
       - ec2-ports-range
       - ec2-security-groups-list
       - ec2-instances-active-security-groups-list
+      - ec2-default-security-group-permissions
+      
   AUDIT_AWS_ELB_ALERT_LIST:
       description: "Which alerts would you like to check for? (Is used to count unused security groups)"
       required: true
