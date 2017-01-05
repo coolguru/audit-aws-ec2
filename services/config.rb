@@ -267,7 +267,7 @@ coreo_aws_advisor_alert "ec2-default-security-group-permissions" do
   id_map "object.security_group_info.owner_id"
   audit_objects ["", "object.security_group_info.ip_permissions"]
   # call_modifiers [{}, {:group_names => ["security_group_info.group_name"]}]
-  operators ["", "!="]
+  operators ["", "=="]
   alert_when ["", "[]"]
 end
 
