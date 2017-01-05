@@ -255,6 +255,21 @@ coreo_aws_advisor_alert "ec2-instances-active-security-groups-list" do
   alert_when [//]
 end
 
+coreo_aws_advisor_alert "ec2-ian-security-groups-default-no-rule-ip" do
+  action :define
+  service :ec2
+  display_name "SG default IP"
+  description "This rule default Instances   ss"
+  category "Inventory"
+  suggested_action "None."
+  level "Critical"
+  objectives ["security_groups"]
+  audit_objects ["object.security_group_info.ip_permissions"]
+  operators ["=="]
+  alert_when ["[]"]
+end
+
+
 coreo_aws_advisor_ec2 "advise-ec2" do
   action :advise
   alerts ${AUDIT_AWS_EC2_ALERT_LIST}
