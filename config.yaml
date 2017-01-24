@@ -1,7 +1,7 @@
 variables:
   AUDIT_AWS_EC2_ALERT_LIST:
     description: "Which alerts would you like to check for? Default is all EC2 alerts."
-    required: true
+    required: false
     type: array
     default:
       - ec2-inventory-instances
