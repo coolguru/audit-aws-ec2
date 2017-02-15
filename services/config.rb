@@ -259,7 +259,7 @@ end
 
 coreo_aws_rule "ec2-not-used-security-groups" do
   action :define
-  service :ec2
+  service :user
   display_name "EC2 security group is not used"
   description "Security group is not used anywhere"
   category "Security"
