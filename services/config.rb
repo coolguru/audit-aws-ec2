@@ -589,3 +589,21 @@ COMPOSITE::coreo_uni_util_jsrunner.ec2-tags-rollup.return
       :to => '${AUDIT_AWS_EC2_ALERT_RECIPIENT}', :subject => 'CloudCoreo ec2 rule results on PLAN::stack_name :: PLAN::name'
   })
 end
+
+coreo_uni_util_notify "advise-ec2-json-to-s3" do
+  action :notify
+  type 's3'
+  allow_empty false
+  send_on 'change'
+  payload '
+COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report
+  '
+  payload_type 'json'
+  endpoint ({
+      object_name:  'PLAN::stack_name-PLAN::name',
+      bucket_name:  'cloudcoreo-cis-test-results',
+      folder:       'PLAN::stack_name/PLAN::name',
+      properties:   {}
+  })
+end
+
