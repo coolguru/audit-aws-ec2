@@ -600,8 +600,8 @@ COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report
   '
   payload_type 'json'
   endpoint ({
-      object_name:  'PLAN::name',
-      bucket_name:  'cloudcoreo-cis-test-results',
+      object_name:  'PLAN::name-coreo.json',
+      bucket_name:  '${AUDIT_AWS_EC2_JSON_TO_S3_BUCKET}',
       folder:       'PLAN::name',
       properties:   {}
   })

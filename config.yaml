@@ -58,3 +58,7 @@ variables:
     required: true
     type: string
     default: "change"
+  AUDIT_AWS_EC2_JSON_TO_S3_BUCKET:
+    description: "S3 bucket to send full JSON report to"
+    required: false
+    type: string
