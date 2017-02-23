@@ -2,8 +2,8 @@
 var fs = require("fs");
 var jmespath = require('jmespath');
 
-var text_aws = fs.readFileSync("./aws_cli.json");
-var text_coreo = fs.readFileSync("./cis_4_1-coreo.json");
+var text_aws = fs.readFileSync("./cis_4_2-awscli.json");
+var text_coreo = fs.readFileSync("./cis_4_2-coreo.json");
 
 var aws = JSON.parse(text_aws);
 var coreo = JSON.parse(text_coreo);
