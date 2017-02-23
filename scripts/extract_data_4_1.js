@@ -13,7 +13,7 @@ var coreo = JSON.parse(text_coreo);
 var test = coreo["us-east-1"];
 //console.log(test);
 
-var str1;
+var str1 = "";
 
 for (var i = 0; i < aws.length; i++){
     var obj = aws[i];

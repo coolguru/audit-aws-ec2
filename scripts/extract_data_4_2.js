@@ -11,9 +11,9 @@ var coreo = JSON.parse(text_coreo);
 //console.log(coreo);
 
 var test = coreo["us-east-1"];
-//console.log(test);
+console.log(test);
 
-var str1;
+var str1 = "";
 
 for (var i = 0; i < aws.length; i++){
     var obj = aws[i];
@@ -27,7 +27,7 @@ for (var i = 0; i < aws.length; i++){
 console.log("list of objects from AWS CLI:\n" + str1);
 
 var jdoc = jmespath.search(coreo, "*.*.*.group_name");
-//console.log(jdoc);
+console.log(jdoc);
 
 var str = JSON.stringify(jdoc);
 str = str.replace(/\[/g, "");
