@@ -329,6 +329,39 @@ coreo_aws_rule "elb-load-balancers-active-security-groups-list" do
   id_map "object.load_balancer_descriptions.load_balancer_name"
 end
 
+# coreo_aws_rule "ec2-ensure-flow-logs-vpcs" do
+#   action :define
+#   service :ec2
+#   include_violations_in_count false
+#   link ""
+#   display_name "VPC Flow Logs"
+#   description "Ensures that there are flow logs enabled for each EC2 VPC"
+#   category "Security"
+#   suggested_action "Activate flow logs for each VPC"
+#   level "Warning"
+#   objectives ["flow_logs"]
+#   audit_objects ["object.flow_logs.deliver_logs_status"]
+#   operators ["!="]
+#   raise_when [nil]
+#   id_map "object.reservation_set.instances_set.instance_id"
+# end
+
+coreo_aws_rule "ec2-ensure-flow-logs-vpcs" do
+  action :define
+  service :ec2
+  include_violations_in_count false
+  link ""
+  display_name "VPC Flow Logs"
+  description "Ensures that there are flow logs enabled for each EC2 VPC"
+  category "Security"
+  suggested_action "Activate flow logs for each VPC"
+  level "Warning"
+  objectives ["vpcs"]
+  audit_objects ["object.vpcs.vpc_id"]
+  operators ["=~"]
+  raise_when [//]
+  id_map "object.vpcs.vpc_id"
+end
 
 coreo_uni_util_variables "ec2-planwide" do
   action :set
@@ -349,6 +382,13 @@ end
 coreo_aws_rule_runner_ec2 "advise-unused-security-groups-ec2" do
   action :run
   rules ["ec2-security-groups-list", "ec2-instances-active-security-groups-list"]
+  regions ${AUDIT_AWS_EC2_REGIONS}
+end
+
+coreo_aws_rule_runner "advise-ec2-u" do
+  action :run
+  service :ec2
+  rules ["ec2-ensure-flow-logs-vpcs"]
   regions ${AUDIT_AWS_EC2_REGIONS}
 end
 
