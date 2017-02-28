@@ -339,10 +339,11 @@ end
 #   category "Security"
 #   suggested_action "Activate flow logs for each VPC"
 #   level "Warning"
-#   objectives ["flow_logs"]
-#   audit_objects ["object.flow_logs.deliver_logs_status"]
-#   operators ["!="]
-#   raise_when [nil]
+#   objectives ["vpcs", "flow_logs"]
+#   call_modifiers [{}, { :filter => [{name: "resource-id", values: ["object.vpcs.vpc_id"]}] }]
+#   audit_objects ["", "object.flow_logs.deliver_logs_status"]
+#   operators ["", "!="]
+#   raise_when ["", nil]
 #   id_map "object.reservation_set.instances_set.instance_id"
 # end
 
