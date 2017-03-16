@@ -107,7 +107,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
       vpcs.forEach(vpc => {
           json_output['number_checks'] = json_output['number_checks'] + 1;
 
-          if (!vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE] || !verifyActiveFlowLogs(vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE]['result_info']))
+          if (!vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE] || !verifyActiveFlowLogs(vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE]['result_info'])) {
                 updateOutputWithResults(region, vpc, vpcFlowLogsInventory[region][vpc]['violations'][VPC_INVENTORY_RULE], VPC_FLOW_LOGS_RULE);
           }
       })
