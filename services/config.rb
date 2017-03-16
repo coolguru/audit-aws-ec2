@@ -259,7 +259,7 @@ regionArray.forEach(region => {
         }
     })
 })
-callback(json_output);
+callback(json_output['violations']);
 EOH
 end
 
