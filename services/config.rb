@@ -28,14 +28,11 @@ coreo_aws_rule "vpc-inventory" do
   service :ec2
   link "http://kb.cloudcoreo.com/"
   include_violations_in_count false
-  display_name "Ensure VPC flow logging is enabled in all VPCs (Scored)"
-  suggested_action "VPC Flow Logs be enabled for packet 'Rejects' for VPCs."
-  description "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs."
+  display_name "Inventory VPCs"
+  description "Inventory VPCs"
   category "Inventory"
   level "Internal"
-  meta_cis_id "4.3"
-  meta_cis_scored "true"
-  meta_cis_level "1"
+  level "Warning"
   objectives    ["vpcs"]
   audit_objects ["vpcs.vpc_id"]
   operators     ["=~"]
@@ -48,11 +45,10 @@ coreo_aws_rule "flow-logs-inventory" do
   service :ec2
   link "http://kb.cloudcoreo.com/"
   include_violations_in_count false
-  display_name "VPC for checking Flow logs"
-  description "VPC flow logs rules"
+  display_name "Inventory Flow logs"
+  description "Inventory Flow logs"
   category "Inventory"
   level "Internal"
-  suggested_action "Enable Flow Logs"
   level "Warning"
   objectives    ["vpcs"]
   objectives    ["flow_logs"]
