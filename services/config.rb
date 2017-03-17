@@ -31,7 +31,7 @@ coreo_aws_rule "vpc-inventory" do
   display_name "Ensure VPC flow logging is enabled in all VPCs (Scored)"
   suggested_action "VPC Flow Logs be enabled for packet 'Rejects' for VPCs."
   description "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs."
-  category "Audit"
+  category "Internal"
   level "Warning"
   meta_cis_id "4.3"
   meta_cis_scored "true"
@@ -50,7 +50,7 @@ coreo_aws_rule "flow-logs-inventory" do
   include_violations_in_count false
   display_name "VPC for checking Flow logs"
   description "VPC flow logs rules"
-  category "Audit"
+  category "Internal"
   suggested_action "Enable Flow Logs"
   level "Warning"
   objectives    ["vpcs"]
@@ -64,8 +64,8 @@ end
 coreo_aws_rule_runner "vpcs-flow-logs-inventory" do
   action :run
   service :ec2
-  regions ["us-east-1"]
   rules ["vpc-inventory", "flow-logs-inventory"]
+  regions ${AUDIT_AWS_EC2_REGIONS}
 end
 
 coreo_uni_util_jsrunner "cis43-processor" do
@@ -92,7 +92,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
   const FLOW_LOGS_INVENTORY_RULE = 'flow-logs-inventory';
   const VPC_INVENTORY_RULE = 'vpc-inventory';
 
-  const regionArrayJSON = "['us-east-1', 'us-west-2']";
+  const regionArrayJSON = "${AUDIT_AWS_EC2_REGIONS}";
   const regionArray = JSON.parse(regionArrayJSON.replace(/'/g, '"'))
 
   const vpcFlowLogsInventory = json_input[0];
