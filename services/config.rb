@@ -32,7 +32,6 @@ coreo_aws_rule "vpc-inventory" do
   description "Inventory VPCs"
   category "Inventory"
   level "Internal"
-  level "Warning"
   objectives    ["vpcs"]
   audit_objects ["vpcs.vpc_id"]
   operators     ["=~"]
@@ -49,7 +48,6 @@ coreo_aws_rule "flow-logs-inventory" do
   description "Inventory Flow logs"
   category "Inventory"
   level "Internal"
-  level "Warning"
   objectives    ["vpcs"]
   objectives    ["flow_logs"]
   audit_objects ["flow_logs.resource_id"]
