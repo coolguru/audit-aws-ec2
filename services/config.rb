@@ -1,15 +1,15 @@
-coreo_aws_rule "ec2-vpc-flow-logs" do
+coreo_aws_rule "cloudtrail-logs-encrypted-rule" do
   action :define
   service :user
   category "Audit"
   link "http://kb.cloudcoreo.com/"
-  display_name "Ensure VPC flow logging is enabled in all VPCs (Scored)"
-  suggested_action "VPC Flow Logs be enabled for packet 'Rejects' for VPCs."
-  description "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs."
+  display_name "Ensure CloudTrail logs are encrypted at rest using KMS CMKs (Scored)"
+  suggested_action "It is recommended that CloudTrail be configured to use SSE-KMS."
+  description "AWS CloudTrail is a web service that records AWS API calls for an account and makes those logs available to users and resources in accordance with IAM policies. AWS Key Management Service (KMS) is a managed service that helps create and control the encryption keys used to encrypt account data, and uses Hardware Security Modules (HSMs) to protect the security of encryption keys. CloudTrail logs can be configured to leverage server side encryption (SSE) and KMS customer created master keys (CMK) to further protect CloudTrail logs."
   level "Warning"
-  meta_cis_id "4.3"
+  meta_cis_id "2.7"
   meta_cis_scored "true"
-  meta_cis_level "1"
+  meta_cis_level "2"
   objectives [""]
   audit_objects [""]
   operators [""]
@@ -19,58 +19,39 @@ end
 
 coreo_aws_rule_runner "cis43-rule" do
   action :run
-  service :ec2
-  rules ["ec2-vpc-flow-logs"]
+  service :cloudtrail
+  rules ["cloudtrail-logs-encrypted-rule"]
 end
 
-coreo_aws_rule "vpc-inventory" do
+coreo_aws_rule "cloudtrail-inventory" do
   action :define
-  service :ec2
+  service :cloudtrail
   link "http://kb.cloudcoreo.com/"
   include_violations_in_count false
-  display_name "Inventory VPCs"
-  description "Inventory VPCs"
+  display_name "Inventory CloudTrail"
+  description "Inventory CloudTrail"
   category "Inventory"
   level "Internal"
-  objectives    ["vpcs"]
-  audit_objects ["vpcs.vpc_id"]
+  objectives    ["trails"]
+  audit_objects ["object.trail_list.name"]
   operators     ["=~"]
   raise_when    [//]
-  id_map        "object.vpcs.vpc_id"
+  id_map        "object.trail_list.name"
 end
 
-coreo_aws_rule "flow-logs-inventory" do
-  action :define
-  service :ec2
-  link "http://kb.cloudcoreo.com/"
-  include_violations_in_count false
-  display_name "Inventory Flow logs"
-  description "Inventory Flow logs"
-  category "Inventory"
-  level "Internal"
-  objectives    ["vpcs"]
-  objectives    ["flow_logs"]
-  audit_objects ["flow_logs.resource_id"]
-  operators     ["=~"]
-  raise_when    [//]
-  id_map        "object.flow_logs.resource_id"
-end
-
-coreo_aws_rule_runner "vpcs-flow-logs-inventory" do
+coreo_aws_rule_runner "cloudtrail-inventory-runner" do
   action :run
-  service :ec2
-  rules ["vpc-inventory", "flow-logs-inventory"]
-  regions ${AUDIT_AWS_EC2_REGIONS}
+  service :cloudtrail
+  rules ["cloudtrail-inventory"]
 end
 
 coreo_uni_util_jsrunner "cis43-processor" do
   action :run
-  json_input '[COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
+  json_input '[COMPOSITE::coreo_aws_rule_runner.cloudtrail-inventory-runner.report]'
   function <<-'EOH'
   const ruleMetaJSON = {
-      'ec2-vpc-flow-logs': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs.inputs,
+      'cloudtrail-logs-encrypted-rule': COMPOSITE::coreo_aws_rule.cloudtrail-logs-encrypted-rule.inputs,
   };
-
   const ruleInputsToKeep = ['service', 'category', 'link', 'display_name', 'suggested_action', 'description', 'level', 'meta_cis_id', 'meta_cis_scored', 'meta_cis_level', 'include_violations_in_count'];
   const ruleMeta = {};
 
@@ -83,27 +64,26 @@ coreo_uni_util_jsrunner "cis43-processor" do
       ruleMeta[rule] = flattenedRule;
   })
 
-  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-logs'
-  const FLOW_LOGS_INVENTORY_RULE = 'flow-logs-inventory';
-  const VPC_INVENTORY_RULE = 'vpc-inventory';
+  const CLOUDTRAIL_LOGS_ENCRYPTED_RULE = 'cloudtrail-logs-encrypted-rule'
+  const CLOUDTRAIL_INVENTORY_RULE = 'cloudtrail-inventory';
 
-  const regionArrayJSON = "${AUDIT_AWS_EC2_REGIONS}";
+  const regionArrayJSON = "['us-east-1', 'us-west-2']";
   const regionArray = JSON.parse(regionArrayJSON.replace(/'/g, '"'))
 
-  const vpcFlowLogsInventory = json_input[0];
+  const cloudTrailInventory = json_input[0];
 
   const json_output = copyViolationInNewJsonInput(regionArray);
 
   regionArray.forEach(region => {
-      if (!vpcFlowLogsInventory[region]) return;
+      if (!cloudTrailInventory[region]) return;
 
-      const vpcs = Object.keys(vpcFlowLogsInventory[region]);
+      const trails = Object.keys(cloudTrailInventory[region]);
 
-      vpcs.forEach(vpc => {
+      trails.forEach(trail => {
           json_output['number_checks'] = json_output['number_checks'] + 1;
 
-          if (!vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE] || !verifyActiveFlowLogs(vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE]['result_info'])){
-                updateOutputWithResults(region, vpc, vpcFlowLogsInventory[region][vpc]['violations'][VPC_INVENTORY_RULE], VPC_FLOW_LOGS_RULE);
+          if (!cloudTrailInventory[region][trail]['violations'][CLOUDTRAIL_INVENTORY_RULE] || !verifyTrailContainsKMSkey(cloudTrailInventory[region][trail]['violations'][CLOUDTRAIL_INVENTORY_RULE]['result_info'])){
+                updateOutputWithResults(region, trail, cloudTrailInventory[region][trail]['violations'][CLOUDTRAIL_INVENTORY_RULE], CLOUDTRAIL_LOGS_ENCRYPTED_RULE);
           }
       })
   })
@@ -130,20 +110,19 @@ coreo_uni_util_jsrunner "cis43-processor" do
           json_output['violations'][region][vpcID]['violations'] = {};
       }
 
-      json_output['violations'][region][vpcID]['violations'][rule] = Object.assign(ruleMeta[rule]);
+      json_output['violations'][region][vpcID]['violations'][rule] = Object.assign(ruleMeta[CLOUDTRAIL_LOGS_ENCRYPTED_RULE]);
   }
 
-  function verifyActiveFlowLogs(results) {
-      let flowLogsActive = false
+  function verifyTrailContainsKMSkey(results) {
+      let kmsKeyExist = false
       results.forEach(result => {
-          const flow_log_status = result['object']['flow_log_status'];
-
-          if (flow_log_status === 'ACTIVE') {
-              flowLogsActive = true;
+          if ("kms_key_id" in result['object']){
+            console.log(result['object'])
+            kmsKeyExist = true
           }
       })
 
-      return flowLogsActive;
+      return kmsKeyExist;
   }
 
 
