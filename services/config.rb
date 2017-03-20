@@ -50,7 +50,7 @@ end
 coreo_uni_util_jsrunner "cis124-processor" do
   action :run
   json_input '[COMPOSITE::coreo_aws_rule_runner.iam-policies-inventory-runner.report]'
-  function <<-'EOH'
+  function <<-EOH
   const ruleMetaJSON = {
       'iam-policies-admin-privilege-rule': COMPOSITE::coreo_aws_rule.iam-policies-admin-privilege-rule.inputs,
   };
