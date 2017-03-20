@@ -1,6 +1,6 @@
 coreo_aws_rule "config-enabled-rule" do
   action :define
-  service :configservice
+  service :user
   link ""
   include_violations_in_count false
   display_name "Ensure AWS Config is enabled in all regions (Scored)"
