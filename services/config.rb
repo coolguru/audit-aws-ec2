@@ -3,7 +3,7 @@ coreo_aws_rule "iam-policies-admin-privilege-rule" do
   service :user
   link "https://d0.awsstatic.com/whitepapers/compliance/AWS_CIS_Foundations_Benchmark.pdf#page=67"
   include_violations_in_count false
-  display_name 'Ensure IAM policies that allow full "*:*" administrative privileges are not created (Scored)'
+  display_name "Ensure IAM policies that allow full '*:*' administrative privileges are not created (Scored)"
   description "IAM policies are the means by which privileges are granted to users, groups, or roles. It is recommended and considered a standard security advice to grant least privilege—that is, granting only the permissions required to perform a task."
   category "Audit"
   suggested_action "Determine what users need to do and then craft policies for them that let the users perform only those tasks, instead of allowing full administrative privileges."
