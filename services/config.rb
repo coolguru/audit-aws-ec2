@@ -11,12 +11,11 @@ coreo_aws_rule "config-enabled-rule" do
   meta_cis_id "2.5"
   meta_cis_scored "true"
   meta_cis_level "1"
-  objectives ["configuration_recorder_status"]
-  call_modifiers [{}]
-  audit_objects ["object.configuration_recorders_status.recording"]
-  operators ["=="]
+  objectives [""]
+  audit_objects [""]
+  operators [""]
   raise_when [true]
-  id_map "object.configuration_recorders_status.name"
+  id_map "static.no_op"
 end
 
 coreo_aws_rule_runner "advise-configservice" do
