@@ -1,7 +1,7 @@
 coreo_aws_rule "cloudtrail-logs-encrypted-rule" do
   action :define
   service :user
-  category "Manual"
+  category "Audit"
   link "http://kb.cloudcoreo.com/"
   display_name "Ensure CloudTrail logs are encrypted at rest using KMS CMKs (Scored)"
   suggested_action "It is recommended that CloudTrail be configured to use SSE-KMS."
