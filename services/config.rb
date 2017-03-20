@@ -21,5 +21,5 @@ end
 coreo_aws_rule_runner "advise-configservice" do
   rules ["config-enabled-rule"]
   action :run
-  service :configservice
+  service :user
 end
