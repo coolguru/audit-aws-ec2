@@ -329,11 +329,11 @@ coreo_aws_rule "elb-load-balancers-active-security-groups-list" do
   id_map "object.load_balancer_descriptions.load_balancer_name"
 end
 
-coreo_aws_rule "ec2-vpc-flow-logs" do
+coreo_aws_rule "ec2-vpc-flow-logs-cis-4.3" do
   action :define
   service :user
   category "Audit"
-  link "http://kb.cloudcoreo.com/"
+  link "https://benchmarks.cisecurity.org/tools2/amazon/CIS_Amazon_Web_Services_Foundations_Benchmark_v1.1.0.pdf#page=136"
   display_name "Ensure VPC flow logging is enabled in all VPCs (Scored)"
   suggested_action "VPC Flow Logs be enabled for packet 'Rejects' for VPCs."
   description "VPC Flow Logs is a feature that enables you to capture information about the IP traffic going to and from network interfaces in your VPC. After you've created a flow log, you can view and retrieve its data in Amazon CloudWatch Logs."
@@ -369,7 +369,7 @@ coreo_aws_rule "vpc-inventory" do
 end
 
 coreo_aws_rule "flow-logs-inventory" do
-  action :define
+  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing
   service :ec2
   link "http://kb.cloudcoreo.com/"
   include_violations_in_count false
@@ -387,7 +387,7 @@ coreo_aws_rule "flow-logs-inventory" do
 end
 
 coreo_aws_rule_runner "vpcs-flow-logs-inventory" do
-  action :run
+  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing
   service :ec2
   regions ["us-east-1"]
   rules ["vpc-inventory", "flow-logs-inventory"]
@@ -521,11 +521,11 @@ end
 
 
 coreo_uni_util_jsrunner "cis43-processor" do
-  action :run
+  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing
   json_input '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
   function <<-'EOH'
   const ruleMetaJSON = {
-      'ec2-vpc-flow-logs': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs.inputs,
+      'ec2-vpc-flow-logs-cis-4.3': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs-cis-4.3.inputs,
   };
   const ruleInputsToKeep = ['service', 'category', 'link', 'display_name', 'suggested_action', 'description', 'level', 'meta_cis_id', 'meta_cis_scored', 'meta_cis_level', 'include_violations_in_count'];
   const ruleMeta = {};
@@ -539,11 +539,11 @@ coreo_uni_util_jsrunner "cis43-processor" do
       ruleMeta[rule] = flattenedRule;
   })
 
-  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-logs'
+  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-logs-cis-4.3'
   const FLOW_LOGS_INVENTORY_RULE = 'flow-logs-inventory';
   const VPC_INVENTORY_RULE = 'vpc-inventory';
 
-  const regionArrayJSON = "['us-east-1', 'us-west-2']";
+  const regionArrayJSON = "${AUDIT_AWS_EC2_REGIONS}";
   const regionArray = JSON.parse(regionArrayJSON.replace(/'/g, '"'))
 
   const vpcFlowLogsInventory = json_input[1];
