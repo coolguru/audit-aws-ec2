@@ -329,7 +329,7 @@ coreo_aws_rule "elb-load-balancers-active-security-groups-list" do
   id_map "object.load_balancer_descriptions.load_balancer_name"
 end
 
-coreo_aws_rule "ec2-vpc-flow-log" do
+coreo_aws_rule "ec2-vpc-flow-logs" do
   action :define
   service :user
   category "Audit"
@@ -525,7 +525,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
   json_input (("${AUDIT_AWS_EC2_ALERT_LIST}".include?("ec2-vpc-flow-logs")) ? '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]' : '[]')
   function <<-'EOH'
   const ruleMetaJSON = {
-      'ec2-vpc-flow-log': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-log.inputs
+      'ec2-vpc-flow-logs': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs.inputs
   };
   const ruleInputsToKeep = ['service', 'category', 'link', 'display_name', 'suggested_action', 'description', 'level', 'meta_cis_id', 'meta_cis_scored', 'meta_cis_level', 'include_violations_in_count'];
   const ruleMeta = {};
