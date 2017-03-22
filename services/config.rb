@@ -519,6 +519,105 @@ coreo_uni_util_variables "ec2-update-planwide-2" do
             ])
 end
 
+
+coreo_uni_util_jsrunner "cis43-processor" do
+  action :run
+  json_input '[COMPOSITE::coreo_uni_util_variables.ec2-planwide.results, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
+  function <<-'EOH'
+  const ruleMetaJSON = {
+      'ec2-vpc-flow-logs': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs.inputs,
+  };
+  const ruleInputsToKeep = ['service', 'category', 'link', 'display_name', 'suggested_action', 'description', 'level', 'meta_cis_id', 'meta_cis_scored', 'meta_cis_level', 'include_violations_in_count'];
+  const ruleMeta = {};
+
+  Object.keys(ruleMetaJSON).forEach(rule => {
+      const flattenedRule = {};
+      ruleMetaJSON[rule].forEach(input => {
+          if (ruleInputsToKeep.includes(input.name))
+              flattenedRule[input.name] = input.value;
+      })
+      ruleMeta[rule] = flattenedRule;
+  })
+
+  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-logs'
+  const FLOW_LOGS_INVENTORY_RULE = 'flow-logs-inventory';
+  const VPC_INVENTORY_RULE = 'vpc-inventory';
+
+  const regionArrayJSON = "['us-east-1', 'us-west-2']";
+  const regionArray = JSON.parse(regionArrayJSON.replace(/'/g, '"'))
+
+  const vpcFlowLogsInventory = json_input[1];
+  var json_output = json_input[0]
+
+  const violations = copyViolationInNewJsonInput(regionArray, json_input[0]);
+
+  regionArray.forEach(region => {
+      if (!vpcFlowLogsInventory[region]) return;
+
+      const vpcs = Object.keys(vpcFlowLogsInventory[region]);
+
+      vpcs.forEach(vpc => {
+          violations['number_checks'] = violations['number_checks'] + 1;
+
+          if (!vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE] || !verifyActiveFlowLogs(vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE]['result_info'])) {
+                updateOutputWithResults(region, vpc, vpcFlowLogsInventory[region][vpc]['violations'][VPC_INVENTORY_RULE], VPC_FLOW_LOGS_RULE);
+          }
+      })
+  })
+
+  function copyViolationInNewJsonInput(regions, input) {
+      const output = {};
+      output['number_ignored_violations'] = 0;
+      output['number_violations'] = 0;
+      output['number_checks'] = 0;
+      output['violations'] = input['violations'];
+      regions.forEach(regionKey => {
+          if (!output['violations'][regionKey]) {
+            output['violations'][regionKey] = {};
+          }
+      });
+      return output;
+  }
+
+  function updateOutputWithResults(region, vpcID, vpcDetails, rule) {
+      violations['number_violations'] = violations['number_violations'] + 1;
+      if (!violations['violations'][region][vpcID]) {
+          violations['violations'][region][vpcID] = {};
+          violations['violations'][region][vpcID]['violator_info'] = vpcDetails;
+      }
+      if (!violations['violations'][region][vpcID]['violations']) {
+          violations['violations'][region][vpcID]['violations'] = {};
+      }
+
+      violations['violations'][region][vpcID]['violations'][rule] = Object.assign(ruleMeta[rule]);
+  }
+
+  function verifyActiveFlowLogs(results) {
+      let flowLogsActive = false
+      results.forEach(result => {
+          const flow_log_status = result['object']['flow_log_status'];
+
+          if (flow_log_status === 'ACTIVE') {
+              flowLogsActive = true;
+          }
+      })
+
+      return flowLogsActive;
+  }
+
+  json_output['violations'] = violations['violations']
+
+  callback(json_output);
+  EOH
+end
+
+coreo_uni_util_variables "ec2-update-planwide-3" do
+  action :set
+  variables([
+                {'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report' => 'COMPOSITE::coreo_uni_util_jsrunner.cis43-processor.return'}
+            ])
+end
+
 coreo_uni_util_jsrunner "ec2-tags-to-notifiers-array" do
   action :run
   data_type "json"
@@ -602,97 +701,6 @@ coreo_uni_util_variables "ec2-update-planwide-3" do
                 {'COMPOSITE::coreo_uni_util_variables.ec2-planwide.table' => 'COMPOSITE::coreo_uni_util_jsrunner.ec2-tags-to-notifiers-array.table'}
             ])
 end
-
-
-coreo_uni_util_jsrunner "cis43-processor" do
-  action :run
-  json_input '[COMPOSITE::coreo_uni_util_variables.ec2-planwide.results, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
-  function <<-'EOH'
-  const ruleMetaJSON = {
-      'ec2-vpc-flow-logs': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs.inputs,
-  };
-/*
-  const ruleInputsToKeep = ['service', 'category', 'link', 'display_name', 'suggested_action', 'description', 'level', 'meta_cis_id', 'meta_cis_scored', 'meta_cis_level', 'include_violations_in_count'];
-  const ruleMeta = {};
-
-  Object.keys(ruleMetaJSON).forEach(rule => {
-      const flattenedRule = {};
-      ruleMetaJSON[rule].forEach(input => {
-          if (ruleInputsToKeep.includes(input.name))
-              flattenedRule[input.name] = input.value;
-      })
-      ruleMeta[rule] = flattenedRule;
-  })
-
-  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-logs'
-  const FLOW_LOGS_INVENTORY_RULE = 'flow-logs-inventory';
-  const VPC_INVENTORY_RULE = 'vpc-inventory';
-
-  const regionArrayJSON = "['us-east-1', 'us-west-2']";
-  const regionArray = JSON.parse(regionArrayJSON.replace(/'/g, '"'))
-
-  const vpcFlowLogsInventory = json_input[0];
-
-  const json_output = copyViolationInNewJsonInput(regionArray);
-
-  regionArray.forEach(region => {
-      if (!vpcFlowLogsInventory[region]) return;
-
-      const vpcs = Object.keys(vpcFlowLogsInventory[region]);
-
-      vpcs.forEach(vpc => {
-          json_output['number_checks'] = json_output['number_checks'] + 1;
-
-          if (!vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE] || !verifyActiveFlowLogs(vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE]['result_info'])) {
-                updateOutputWithResults(region, vpc, vpcFlowLogsInventory[region][vpc]['violations'][VPC_INVENTORY_RULE], VPC_FLOW_LOGS_RULE);
-          }
-      })
-  })
-
-  function copyViolationInNewJsonInput(regions) {
-      const output = {};
-      output['number_ignored_violations'] = 0;
-      output['number_violations'] = 0;
-      output['number_checks'] = 0;
-      output['violations'] = {};
-      regions.forEach(regionKey => {
-          output['violations'][regionKey] = {};
-      });
-      return output;
-  }
-
-  function updateOutputWithResults(region, vpcID, vpcDetails, rule) {
-      json_output['number_violations'] = json_output['number_violations'] + 1;
-      if (!json_output['violations'][region][vpcID]) {
-          json_output['violations'][region][vpcID] = {};
-          json_output['violations'][region][vpcID]['violator_info'] = vpcDetails;
-      }
-      if (!json_output['violations'][region][vpcID]['violations']) {
-          json_output['violations'][region][vpcID]['violations'] = {};
-      }
-
-      json_output['violations'][region][vpcID]['violations'][rule] = Object.assign(ruleMeta[rule]);
-  }
-
-  function verifyActiveFlowLogs(results) {
-      let flowLogsActive = false
-      results.forEach(result => {
-          const flow_log_status = result['object']['flow_log_status'];
-
-          if (flow_log_status === 'ACTIVE') {
-              flowLogsActive = true;
-          }
-      })
-
-      return flowLogsActive;
-  }
-*/
-
-  console.log(json_input[0])
-  callback(json_input[1]);
-  EOH
-end
-
 
 coreo_uni_util_jsrunner "ec2-tags-rollup" do
   action :run
