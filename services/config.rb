@@ -522,7 +522,7 @@ end
 
 coreo_uni_util_jsrunner "cis43-processor" do
   action :run
-  json_input '[COMPOSITE::coreo_uni_util_variables.ec2-planwide.results, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
+  json_input '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
   function <<-'EOH'
   const ruleMetaJSON = {
       'ec2-vpc-flow-logs': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-logs.inputs,
