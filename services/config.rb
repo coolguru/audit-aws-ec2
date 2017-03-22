@@ -567,29 +567,26 @@ coreo_uni_util_jsrunner "cis43-processor" do
 
   function copyViolationInNewJsonInput(regions, input) {
       const output = {};
-      output['number_ignored_violations'] = 0;
-      output['number_violations'] = 0;
-      output['number_checks'] = 0;
-      output['violations'] = input['violations'];
       regions.forEach(regionKey => {
-          if (!output['violations'][regionKey]) {
-            output['violations'][regionKey] = {};
+          if (!input[regionKey]) {
+            output[regionKey] = {};
+          } else {
+            output[regionKey] = input[regionKey]
           }
       });
       return output;
   }
 
   function updateOutputWithResults(region, vpcID, vpcDetails, rule) {
-      violations['number_violations'] = violations['number_violations'] + 1;
-      if (!violations['violations'][region][vpcID]) {
-          violations['violations'][region][vpcID] = {};
-          violations['violations'][region][vpcID]['violator_info'] = vpcDetails;
+      if (!violations[region][vpcID]) {
+          violations[region][vpcID] = {};
+          violations[region][vpcID]['violator_info'] = vpcDetails;
       }
-      if (!violations['violations'][region][vpcID]['violations']) {
-          violations['violations'][region][vpcID]['violations'] = {};
+      if (!violations[region][vpcID]['violations']) {
+          violations[region][vpcID]['violations'] = {};
       }
 
-      violations['violations'][region][vpcID]['violations'][rule] = Object.assign(ruleMeta[rule]);
+      violations[region][vpcID]['violations'][rule] = Object.assign(ruleMeta[rule]);
   }
 
   function verifyActiveFlowLogs(results) {
@@ -604,8 +601,6 @@ coreo_uni_util_jsrunner "cis43-processor" do
 
       return flowLogsActive;
   }
-
-  json_output['violations'] = violations['violations']
 
   callback(json_output);
   EOH
