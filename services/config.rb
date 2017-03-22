@@ -607,7 +607,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
 end
 
 coreo_uni_util_variables "ec2-update-planwide-3" do
-  action :set
+  action :${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :set : :nothing
   variables([
                 {'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report' => 'COMPOSITE::coreo_uni_util_jsrunner.cis43-processor.return'}
             ])
