@@ -349,7 +349,7 @@ coreo_aws_rule "ec2-vpc-flow-logs-cis-4.3" do
 end
 
 coreo_aws_rule "vpc-inventory" do
-  action :define
+  action (${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :define : :nothing)
   service :ec2
   link "http://kb.cloudcoreo.com/"
   include_violations_in_count false
@@ -369,7 +369,7 @@ coreo_aws_rule "vpc-inventory" do
 end
 
 coreo_aws_rule "flow-logs-inventory" do
-  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing
+  action (${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing)
   service :ec2
   link "http://kb.cloudcoreo.com/"
   include_violations_in_count false
@@ -387,9 +387,9 @@ coreo_aws_rule "flow-logs-inventory" do
 end
 
 coreo_aws_rule_runner "vpcs-flow-logs-inventory" do
-  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing
+  action (${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing)
   service :ec2
-  regions ["us-east-1"]
+  regions ${AUDIT_AWS_EC2_REGIONS}
   rules ["vpc-inventory", "flow-logs-inventory"]
 end
 
@@ -521,7 +521,7 @@ end
 
 
 coreo_uni_util_jsrunner "cis43-processor" do
-  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing
+  action (${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing)
   json_input '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
   function <<-'EOH'
   const ruleMetaJSON = {
@@ -607,7 +607,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
 end
 
 coreo_uni_util_variables "ec2-update-planwide-3" do
-  action ${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :set : :nothing
+  action (${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :set : :nothing)
   variables([
                 {'COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report' => 'COMPOSITE::coreo_uni_util_jsrunner.cis43-processor.return'}
             ])
