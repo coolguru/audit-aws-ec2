@@ -521,7 +521,7 @@ end
 
 
 coreo_uni_util_jsrunner "cis43-processor" do
-  action (${AUDIT_AWS_EC2_ALERT_LIST}.include? 'ec2-vpc-flow-logs-cis-4.3' ? :run : :nothing)
+  action :run
   json_input '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]'
   function <<-'EOH'
   const ruleMetaJSON = {
