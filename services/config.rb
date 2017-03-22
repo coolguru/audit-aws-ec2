@@ -539,7 +539,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
       ruleMeta[rule] = flattenedRule;
   })
 
-  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-log'
+  const VPC_FLOW_LOGS_RULE = 'ec2-vpc-flow-logs'
   const FLOW_LOGS_INVENTORY_RULE = 'flow-logs-inventory';
   const VPC_INVENTORY_RULE = 'vpc-inventory';
 
@@ -549,7 +549,7 @@ coreo_uni_util_jsrunner "cis43-processor" do
   const vpcFlowLogsInventory = json_input[1];
   var json_output = json_input[0]
 
-  const violations = copyViolationInNewJsonInput(regionArray, json_input[0]);
+  const violations = copyViolationInNewJsonInput(regionArray, json_output);
 
   regionArray.forEach(region => {
       if (!vpcFlowLogsInventory[region]) return;
@@ -557,8 +557,6 @@ coreo_uni_util_jsrunner "cis43-processor" do
       const vpcs = Object.keys(vpcFlowLogsInventory[region]);
 
       vpcs.forEach(vpc => {
-          violations['number_checks'] = violations['number_checks'] + 1;
-
           if (!vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE] || !verifyActiveFlowLogs(vpcFlowLogsInventory[region][vpc]['violations'][FLOW_LOGS_INVENTORY_RULE]['result_info'])) {
                 updateOutputWithResults(region, vpc, vpcFlowLogsInventory[region][vpc]['violations'][VPC_INVENTORY_RULE], VPC_FLOW_LOGS_RULE);
           }
@@ -602,8 +600,8 @@ coreo_uni_util_jsrunner "cis43-processor" do
       return flowLogsActive;
   }
 
-  callback(json_output);
-  EOH
+  callback(violations);
+EOH
 end
 
 coreo_uni_util_variables "ec2-update-planwide-3" do
