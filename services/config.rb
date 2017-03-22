@@ -522,7 +522,7 @@ end
 
 coreo_uni_util_jsrunner "cis43-processor" do
   action (("${AUDIT_AWS_EC2_ALERT_RECIPIENT}".include?("ec2-vpc-flow-logs")) ? :run : :nothing)
-  json_input (("${AUDIT_AWS_EC2_ALERT_RECIPIENT}".include?("ec2-vpc-flow-logs")) ? '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]' : [''])
+  json_input (("${AUDIT_AWS_EC2_ALERT_RECIPIENT}".include?("ec2-vpc-flow-logs")) ? '[COMPOSITE::coreo_aws_rule_runner_ec2.advise-ec2.report, COMPOSITE::coreo_aws_rule_runner.vpcs-flow-logs-inventory.report]' : '[]')
   function <<-'EOH'
   const ruleMetaJSON = {
       'ec2-vpc-flow-log': COMPOSITE::coreo_aws_rule.ec2-vpc-flow-log.inputs
